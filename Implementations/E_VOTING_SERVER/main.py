@@ -40,7 +40,7 @@ root.wm_attributes('-transparentcolor', 'purple')
 
 login_window = Toplevel(root)
 login_window.title('E - Voting Server | Login')
-login_window.geometry(f'720x500+{root.winfo_screenwidth()//2 - 360}+{root.winfo_screenheight()//2 - 300}')
+login_window.geometry(f'720x510+{root.winfo_screenwidth()//2 - 360}+{root.winfo_screenheight()//2 - 300}')
 login_window.resizable(FALSE, FALSE)
 login_window.protocol('WM_DELETE_WINDOW', root.destroy)
 
