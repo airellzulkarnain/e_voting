@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, and_
+from sqlalchemy import select, update, and_, delete
 from sqlalchemy.orm import Session
 from pandas import DataFrame
 import models
@@ -18,6 +18,12 @@ def masukan_pasangan(db: Session, nama_ketua: str,
 
 def ubah_pasangan(db: Session, nomor_urut, **kwargs):
     db.execute(update(models.Pasangan).where(models.Pasangan.nomor_urut == nomor_urut).values(**kwargs))
+    db.commit()
+    return 1
+
+
+def hapus_pasangan(db: Session, nomor_urut):
+    db.execute(delete(models.Pasangan).where(models.Pasangan.nomor_urut == nomor_urut))
     db.commit()
     return 1
 
@@ -47,9 +53,14 @@ def verifikasi_token(db: Session, token: str):
             db.commit()
             return 1
 
-def login(db: Session, passcode: str):
+def cek_passcode(db: Session, passcode: str):
     if db.scalar(select(models.Passcode.keyword)) == passcode:
         return True
+
+def ubah_passcode(db: Session, new_passcode: str):
+    db.execute(update(models.Passcode.keyword).where(models.Passcode.id == 1).values(keyword=new_passcode))
+    db.commit()
+    return 1
 
 def ambil_pasangan(db: Session):
     return db.execute(select(models.Pasangan)).all()
