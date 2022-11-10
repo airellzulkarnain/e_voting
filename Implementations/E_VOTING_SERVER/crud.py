@@ -29,12 +29,14 @@ def hapus_pasangan(db: Session, nomor_urut):
 
 
 def cetak_token(db: Session):
-    tokens = db.execute(select(models.Token).where(models.Token.terpakai == False)).all()
+    tokens = db.execute(select(models.Token).where(models.Token.terpakai == False)).scalars().all()
     df = DataFrame({'tokens': [x.keyword for x in tokens]})
     df.to_excel(r'temp\temp.xlsx', index=False)
     win32api.ShellExecute(0, 'print', r'temp\temp.xlsx', None, '.', 0)
     return 1
 
+def lihat_token(db: Session):
+    return db.execute(select(models.Token)).scalars().all()
 
 def buat_token(db: Session, jumlah: int):
     characters = string.ascii_letters + string.digits
@@ -58,12 +60,12 @@ def cek_passcode(db: Session, passcode: str):
         return True
 
 def ubah_passcode(db: Session, new_passcode: str):
-    db.execute(update(models.Passcode.keyword).where(models.Passcode.id == 1).values(keyword=new_passcode))
+    db.execute(update(models.Passcode).where(models.Passcode.id == 1).values(keyword=new_passcode))
     db.commit()
     return 1
 
 def ambil_pasangan(db: Session):
-    return db.execute(select(models.Pasangan)).all()
+    return db.execute(select(models.Pasangan)).scalars().all()
 
 def masukan_suara(db: Session, nomor_urut: int):
     pasangan = db.scalar(select(models.Pasangan).where(models.Pasangan.nomor_urut == nomor_urut))

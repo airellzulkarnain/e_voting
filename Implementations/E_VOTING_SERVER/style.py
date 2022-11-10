@@ -14,3 +14,4 @@ def stylize(style: Style)->None:
     style.map('keluar.TButton', background=[('active','#f73829')], relief=[('pressed', 'solid')])
     style.map('TLabel', background=[('disabled', 'whitesmoke')])
     style.map('TEntry', background=[('disabled', 'whitesmoke')])
+    style.configure('paslon.Treeview', rowheight=80, font=('Times New Roman', 14, 'normal'))
