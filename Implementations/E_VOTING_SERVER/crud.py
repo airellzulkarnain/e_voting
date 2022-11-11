@@ -57,10 +57,11 @@ def buat_token(db: Session, jumlah: int):
 
 def verifikasi_token(db: Session, token: str, nisn: str):
         token = db.scalar(select(models.Token).where(and_(models.Token.keyword == token, models.Token.terpakai == False)))
-        if token is not None:
+        nisn = db.scalar(select(models.PesertaPemilu.nisn).where(models.PesertaPemilu.nisn == nisn))
+        if token is not None and nisn is not None:
             token.terpakai = True
             db.commit()
-            return 1
+            return nisn
 
 def cek_passcode(db: Session, passcode: str):
     if db.scalar(select(models.Passcode.keyword)) == passcode:
