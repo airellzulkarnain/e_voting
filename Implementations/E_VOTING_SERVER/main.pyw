@@ -3,6 +3,7 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
 from database import SessionLocal, engine
 from server import app
@@ -68,6 +69,8 @@ def main_window():
         for child in tambah_paslon_frame.winfo_children(): 
                 child.state(['disabled'])
         treeview_pasangan.state(['disabled'])
+        tombol_masukan_peserta_pemilu.state(['disabled'])
+        tombol_delete_paslon.state(['disabled'])
         global server
         server = multiprocessing.Process(target=run_api, daemon=True)
         server.start()
@@ -80,20 +83,59 @@ def main_window():
         for child in tambah_paslon_frame.winfo_children(): 
                 child.state(['!disabled'])
         treeview_pasangan.state(['!disabled'])
+        tombol_masukan_peserta_pemilu.state(['!disabled'])
+        tombol_delete_paslon.state(['!disabled'])
 
     @get_db
-    def ubah_pasangan(db: Session): 
-        pass
-
+    def masukan_peserta_pemilu(db: Session):
+        messagebox.showwarning('Warning', 'File Harus Terdapat Kolom NISN dan NAMA!\nSeluruh Peserta Sebelumnya akan dihapus!')
+        try: 
+            xlsx_nama = filedialog.askopenfilename(title='Pilih File Untuk Peserta Pemilu', filetypes=[('Excel File...', '.xlsx')])
+            crud.masukan_peserta(db, xlsx_nama)
+            messagebox.showinfo('Info', 'Berhasil Memasukan Peserta')
+        except:
+            messagebox.showerror('Error', 'Gagal Memasukan Peserta !')
     @get_db
     def hapus_pasangan(db: Session):
         try: 
             nomor_urut = treeview_pasangan.item(treeview_pasangan.selection()[0])['values'][0]
             if messagebox.askyesno('Warning', 'Apakah anda yakin ingin menghapus pasangan ?', icon='warning'):
+                os.remove(gambar_pasangan[nomor_urut][1])
+                os.remove(gambar_pasangan[nomor_urut][2])
+                gambar_pasangan.pop(nomor_urut)
                 crud.hapus_pasangan(db, nomor_urut)
                 tombol_refresh_paslon.invoke()
         except IndexError:
             pass
+
+    @get_db
+    def lihat_peserta(db: Session):
+        tombol_lihat_peserta.state(['disabled'])
+        def close():
+            tombol_lihat_peserta.state(['!disabled'])
+            peserta_window.destroy()
+        
+        peserta_window = Toplevel(root)
+        peserta_window.title('Peserta Pemilu')
+        peserta_window.geometry('600x300')
+        peserta_window.resizable(FALSE, FALSE)
+        peserta_window.protocol('WM_DELETE_WINDOW', close)
+        lihat_peserta_frame = ttk.Frame(peserta_window)
+        lihat_peserta_frame.grid(column=0, row=0, sticky=(N,E,W,S))
+        treeview_peserta = ttk.Treeview(lihat_peserta_frame, columns=('nama', 'nisn', 'nomor'), show='headings')
+        treeview_peserta.heading('nama', text='NAMA')
+        treeview_peserta.heading('nisn', text='NISN')
+        treeview_peserta.heading('nomor', text='Nomor Pilihan')
+        treeview_peserta.grid(column=1, row=1, sticky=(N,E,W,S))
+        scrollbar_peserta = ttk.Scrollbar(lihat_peserta_frame, orient=VERTICAL, command=treeview_peserta.yview)
+        scrollbar_peserta.grid(column=2, row=1, sticky=(S, N))
+        treeview_peserta.configure(yscrollcommand=scrollbar_peserta.set)
+        for peserta in crud.lihat_peserta(db):
+            treeview_peserta.insert('', 'end', values=(peserta.nama, peserta.nisn, peserta.nomor_urut_yang_dipilih if peserta.nomor_urut_yang_dipilih is not None else 'Belum Memilih'))
+        peserta_window.rowconfigure(0, weight=1)
+        peserta_window.columnconfigure(0, weight=1)
+        lihat_peserta_frame.columnconfigure(1, weight=1)
+        lihat_peserta_frame.rowconfigure(1, weight=4)
 
     @get_db
     def lihat_token(db: Session):
@@ -147,40 +189,49 @@ def main_window():
                 new_gambar_wakil = 'images/'+(''.join(random.choices(string.ascii_letters+string.digits, k=12))+'.'+os.path.basename(gambar_wakil).split('.')[1])
                 file_gambar_ketua = None
                 file_gambar_wakil = None
-                with open(gambar_ketua, 'rb') as gambar:
-                    file_gambar_ketua = gambar.read()
-                with open(new_gambar_ketua, 'wb') as file:
-                    file.write(file_gambar_ketua)
-                with open(gambar_wakil, 'rb') as gambar:
-                    file_gambar_wakil = gambar.read()
-                with open(new_gambar_wakil, 'wb') as file:
-                    file.write(file_gambar_wakil)
-                if crud.masukan_pasangan(db, nama_ketua.get(), nama_wakil.get(), new_gambar_ketua, new_gambar_wakil, int(nomor_urut.get())):
-                    form_error.configure(text=' ')
-                    messagebox.showinfo('Info', 'Pasangan berhasil ditambahkan')
-                    label_gambar_ketua.configure(text='Gambar Ketua - No File Selected')
-                    label_gambar_wakil.configure(text='Gambar Wakil - No File Selected')
-                    tombol_gambar_wakil.configure(text='+')
-                    tombol_gambar_ketua.configure(text='+')
-                    nama_ketua.set('')
-                    nama_wakil.set('')
-                    nomor_urut.set('')
-                    gambar_ketua = ''
-                    gambar_wakil = ''
-                    refresh()
+                try:
+                    if crud.masukan_pasangan(db, nama_ketua.get(), nama_wakil.get(), new_gambar_ketua, new_gambar_wakil, int(nomor_urut.get())):
+                        with open(gambar_ketua, 'rb') as gambar:
+                            file_gambar_ketua = gambar.read()
+                        with open(new_gambar_ketua, 'wb') as file:
+                            file.write(file_gambar_ketua)
+                        with open(gambar_wakil, 'rb') as gambar:
+                            file_gambar_wakil = gambar.read()
+                        with open(new_gambar_wakil, 'wb') as file:
+                            file.write(file_gambar_wakil)
+                        form_error.configure(text=' ')
+                        messagebox.showinfo('Info', 'Pasangan berhasil ditambahkan')
+                        label_gambar_ketua.configure(text='Gambar Ketua - No File Selected')
+                        label_gambar_wakil.configure(text='Gambar Wakil - No File Selected')
+                        tombol_gambar_wakil.configure(text='+')
+                        tombol_gambar_ketua.configure(text='+')
+                        nama_ketua.set('')
+                        nama_wakil.set('')
+                        nomor_urut.set('')
+                        gambar_ketua = ''
+                        gambar_wakil = ''
+                        refresh()
+                except IntegrityError:
+                    messagebox.showerror('Error!', 'Nama Pasangan dengan nomor urut yang sama sudah ada !')
         else: 
             form_error.configure(text='Tolong isi lengkapi semua form !')
 
     @get_db
     def ganti_passcode(db: Session):
         if messagebox.askyesno('warning', 'Apakah anda yakin ingin mengubah passcode ?', icon='warning'): 
-            crud.ubah_passcode(db, new_passcode.get())
-            new_passcode.set('')
+            if len(new_passcode.get()) < 5:
+                messagebox.showerror('Error !', 'Passcode harus lebih dari atau sama dengan 5 karakter !')
+            else: 
+                crud.ubah_passcode(db, new_passcode.get())
+                new_passcode.set('')
 
     @get_db
     def buat_token(db: Session):
         if messagebox.askyesno('Info', 'Buat token ?'): 
-            crud.buat_token(db, int(token.get()))
+            try: 
+                crud.buat_token(db, int(token.get()))
+            except ValueError:
+                messagebox.showerror('Error !', 'Jumlah harus berisi angka !')
 
     def masukan_gambar_wakil():
         global gambar_wakil
@@ -206,8 +257,8 @@ def main_window():
                 image_ketua_dan_wakil.paste(image_ketua, (0, 0))
                 image_ketua_dan_wakil.paste(image_wakil, (60, 0))
                 global gambar_pasangan
-                gambar_pasangan[pasangan.nomor_urut] = ImageTk.PhotoImage(image_ketua_dan_wakil)
-                treeview_pasangan.insert('', 'end', image=gambar_pasangan[pasangan.nomor_urut], values=(pasangan.nomor_urut, pasangan.nama_ketua, pasangan.nama_wakil, pasangan.jumlah_suara))
+                gambar_pasangan[pasangan.nomor_urut] = [ImageTk.PhotoImage(image_ketua_dan_wakil), pasangan.gambar_ketua, pasangan.gambar_wakil]
+                treeview_pasangan.insert('', 'end', image=gambar_pasangan[pasangan.nomor_urut][0], values=(pasangan.nomor_urut, pasangan.nama_ketua, pasangan.nama_wakil, pasangan.jumlah_suara))
             except:
                 treeview_pasangan.insert('', 'end', values=(pasangan.nomor_urut, pasangan.nama_ketua, pasangan.nama_wakil, pasangan.jumlah_suara))
 
@@ -264,26 +315,27 @@ def main_window():
     scrollbar_pasangan.grid(column=1, row=0, sticky=(N,E,W,S))
     button_frame = ttk.Frame(paslon_frame)
     button_frame.grid(column=0, row=1, sticky=(N,E,W,S))
-    tombol_update_paslon = ttk.Button(button_frame, text='Update', command=ubah_pasangan)
     tombol_delete_paslon = ttk.Button(button_frame, text='Delete', command=hapus_pasangan)
     tombol_refresh_paslon = ttk.Button(button_frame, text='Refresh', command=refresh)
-    tombol_update_paslon.grid(column=1,row=0, sticky=(W, E), padx=4, pady=2)
     tombol_delete_paslon.grid(column=2,row=0, sticky=(W, E), padx=4, pady=2)
     tombol_refresh_paslon.grid(column=3,row=0, sticky=(W, E), padx=4, pady=2)
 
     paslon_frame.columnconfigure(0, weight=1)
     paslon_frame.rowconfigure(0, weight=1)
     token_frame = ttk.LabelFrame(main_windows_frame, labelwidget=ttk.Label(main_windows_frame, text='Verifikasi Token'))
-    masukan_jumlah_token = ttk.Spinbox(token_frame, from_=1.0, to=200.0, textvariable=token)
+    masukan_jumlah_token = ttk.Spinbox(token_frame, from_=1.0, to=1300.0, textvariable=token)
     tombol_buat_token = ttk.Button(token_frame, text='Buat', command=buat_token)
     tombol_lihat_token = ttk.Button(token_frame, text='Lihat', command=lihat_token)
     tombol_mulai = ttk.Button(main_windows_frame, text='Mulai', command=start_server)
     tombol_keluar = ttk.Button(main_windows_frame, text='Tutup', command=root.destroy, style='keluar.TButton')
+    tombol_masukan_peserta_pemilu = ttk.Button(main_windows_frame, text='Tambahkan Peserta Pemilu', command=masukan_peserta_pemilu)
+    tombol_lihat_peserta = ttk.Button(main_windows_frame, text='Lihat Peserta', command=lihat_peserta)
     masukan_jumlah_token.grid(column=1, row=1, sticky=(W, E))
-    masukan_jumlah_token.state(['readonly'])
     tombol_buat_token.grid(column=2, row=1, sticky=(W, E), padx=4, pady=6)
     tombol_lihat_token.grid(column=3, row=1, sticky=(W, E), padx=4, pady=6)
-    tambah_paslon_frame.grid(column=1, row=1, rowspan=3, sticky=(N, E, W, S))
+    tambah_paslon_frame.grid(column=1, row=1, sticky=(N, E, W, S))
+    tombol_masukan_peserta_pemilu.grid(column=1, row=3, sticky=(N, E, W, S), padx=4, pady=(2, 0))
+    tombol_lihat_peserta.grid(column=1, row=2, sticky=(N, E, W, S), padx=4, pady=(0, 2))
     paslon_frame.grid(column=2, row=1, columnspan=2, sticky=(N, E, W, S))
     token_frame.grid(column=2, row=2, sticky=(N, E, W, S))
     passcode_frame.grid(column=2, row=3, sticky=(N, E, W, S))

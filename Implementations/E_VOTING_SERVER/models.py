@@ -1,12 +1,11 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from database import Base
 
 
 class Pasangan(Base):
     __tablename__ = 'pasangan'
 
-    id = Column(Integer, primary_key=True)
-    nomor_urut = Column(Integer, nullable=False, unique=True)
+    nomor_urut = Column(Integer, nullable=False, unique=True, autoincrement=False, primary_key=True)
     nama_ketua = Column(String, nullable=False)
     nama_wakil = Column(String, nullable=False)
     gambar_wakil = Column(String, nullable=False)
@@ -27,3 +26,9 @@ class Passcode(Base):
 
     id = Column(Integer, primary_key=True)
     keyword = Column(String, nullable=False, default='admin')
+
+class PesertaPemilu(Base):
+    __tablename__ = 'peserta_pemilu'
+    nisn = Column(String, unique=True, index=True, primary_key=True)
+    nama = Column(String)
+    nomor_urut_yang_dipilih = Column(Integer, ForeignKey('pasangan.nomor_urut'))
