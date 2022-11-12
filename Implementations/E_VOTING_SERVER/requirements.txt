@@ -21,6 +21,7 @@ openpyxl==3.0.10
 orjson==3.8.1
 pandas==1.5.1
 pefile==2022.5.30
+Pillow==9.3.0
 pydantic==1.10.2
 pyinstaller==5.6.2
 pyinstaller-hooks-contrib==2022.11

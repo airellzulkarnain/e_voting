@@ -1,3 +1,3 @@
-/venv 
-/Implementations/E_VOTING_SERVER/build
-/Implementations/E_VOTING_SERVER/dist
+*/venv 
+/Implementations/*/build
+/Implementations/*/dist
