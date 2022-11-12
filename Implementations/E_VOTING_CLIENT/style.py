@@ -9,7 +9,9 @@ def stylize(style: Style):
         "TButton", background=[("active", "#008cff")], relief=[("pressed", "solid")]
     )
     style.configure("TFrame", background="whitesmoke")
-    style.configure("selected.TFrame", background="blue")
+    style.configure("selected.TFrame", background="skyblue")
+    style.configure("kartu.TLabel", font=('Arial', 20, 'normal'))
+    style.configure("kartuselected.TLabel", background="skyblue", font=('Arial', 20, 'bold'))
     style.configure("TLabel", background="whitesmoke", font=('Arial', 14, 'normal'))
     style.configure("TEntry", background="whitesmoke")
     style.configure('masuk.TButton', font=('Arial', 16, 'bold'))

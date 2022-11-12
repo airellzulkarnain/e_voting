@@ -121,5 +121,4 @@ def masukan_suara(db: Session, nomor_urut: int, nisn: str):
     peserta_pemilu.nomor_urut_yang_dipilih = nomor_urut
     pasangan.jumlah_suara += 1
     db.commit()
-    db.refresh(pasangan)
-    return pasangan
+    return 1
