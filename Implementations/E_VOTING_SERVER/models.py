@@ -3,9 +3,11 @@ from database import Base
 
 
 class Pasangan(Base):
-    __tablename__ = 'pasangan'
+    __tablename__ = "pasangan"
 
-    nomor_urut = Column(Integer, nullable=False, unique=True, autoincrement=False, primary_key=True)
+    nomor_urut = Column(
+        Integer, nullable=False, unique=True, autoincrement=False, primary_key=True
+    )
     nama_ketua = Column(String, nullable=False)
     nama_wakil = Column(String, nullable=False)
     gambar_wakil = Column(String, nullable=False)
@@ -14,7 +16,7 @@ class Pasangan(Base):
 
 
 class Token(Base):
-    __tablename__ = 'token'
+    __tablename__ = "token"
 
     id = Column(Integer, primary_key=True)
     keyword = Column(String, nullable=False, unique=True)
@@ -22,13 +24,14 @@ class Token(Base):
 
 
 class Passcode(Base):
-    __tablename__ = 'passcode'
+    __tablename__ = "passcode"
 
     id = Column(Integer, primary_key=True)
-    keyword = Column(String, nullable=False, default='admin')
+    keyword = Column(String, nullable=False, default="admin")
+
 
 class PesertaPemilu(Base):
-    __tablename__ = 'peserta_pemilu'
+    __tablename__ = "peserta_pemilu"
     nisn = Column(String, unique=True, index=True, primary_key=True)
     nama = Column(String)
-    nomor_urut_yang_dipilih = Column(Integer, ForeignKey('pasangan.nomor_urut'))
+    nomor_urut_yang_dipilih = Column(Integer, ForeignKey("pasangan.nomor_urut"))
