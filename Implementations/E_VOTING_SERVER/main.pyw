@@ -126,6 +126,7 @@ def main_window():
 
     @get_db
     def lihat_peserta(db: Session):
+        keyword = StringVar()
         tombol_lihat_peserta.state(["disabled"])
 
         def close():
@@ -150,6 +151,7 @@ def main_window():
             lihat_peserta_frame, orient=VERTICAL, command=treeview_peserta.yview
         )
         scrollbar_peserta.grid(column=2, row=1, sticky=(S, N))
+        masukan_cari_peserta = ttk.Entry(lihat_peserta_frame, textvariable=keyword)
         treeview_peserta.configure(yscrollcommand=scrollbar_peserta.set)
         for peserta in crud.lihat_peserta(db):
             treeview_peserta.insert(
@@ -402,17 +404,20 @@ def main_window():
         passcode_frame, text="Ubah", command=ganti_passcode
     )
     masukan_ubah_passcode.grid(column=1, row=1, sticky=(W, E), padx=4, pady=6)
+    masukan_ubah_passcode.bind('<Return>', lambda e: tombol_ubah_passcode.invoke())
     tombol_ubah_passcode.grid(column=2, row=1, sticky=(W, E), padx=4, pady=6)
 
     ttk.Label(tambah_paslon_frame, text="Nomor Urut").grid(
         column=1, row=1, sticky=(W, E)
     )
     masukan_nomor_urut.grid(column=1, row=2, sticky=(W, E))
+    masukan_nomor_urut.bind('<Return>', lambda e: masukan_nama_ketua.focus())
     masukan_nomor_urut.state(["readonly"])
     ttk.Label(tambah_paslon_frame, text="Nama Ketua").grid(
         column=1, row=3, sticky=(W, E)
     )
     masukan_nama_ketua.grid(column=1, row=4, sticky=(W, E))
+    masukan_nama_ketua.bind('<Return>', lambda e: masukan_nama_wakil.focus())
     ttk.Label(tambah_paslon_frame, text="Nama Wakil").grid(
         column=1, row=5, sticky=(W, E)
     )
@@ -484,6 +489,7 @@ def main_window():
         main_windows_frame, text="Lihat Peserta", command=lihat_peserta
     )
     masukan_jumlah_token.grid(column=1, row=1, sticky=(W, E))
+    masukan_jumlah_token.bind('<Return>', lambda e: tombol_buat_token.invoke())
     tombol_buat_token.grid(column=2, row=1, sticky=(W, E), padx=4, pady=6)
     tombol_lihat_token.grid(column=3, row=1, sticky=(W, E), padx=4, pady=6)
     tambah_paslon_frame.grid(column=1, row=1, sticky=(N, E, W, S))

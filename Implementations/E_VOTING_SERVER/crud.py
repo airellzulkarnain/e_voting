@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, and_, delete
+from sqlalchemy import select, update, and_, delete, or_
 from sqlalchemy.orm import Session
 import pandas as pd
 import models
@@ -63,7 +63,9 @@ def lihat_token(db: Session):
     return db.execute(select(models.Token)).scalars().all()
 
 
-def lihat_peserta(db: Session):
+def lihat_peserta(db: Session, keyword: str | None = None):
+    if bool(keyword):
+        return db.execute(select(models.PesertaPemilu).where(or_(models.PesertaPemilu.nama.like(f'%{keyword}%'), models.PesertaPemilu.nisn.like(f'%{keyword}%'), models.PesertaPemilu.nomor_urut_yang_dipilih.like(f'%{keyword}%'))))
     return db.execute(select(models.PesertaPemilu)).scalars().all()
 
 

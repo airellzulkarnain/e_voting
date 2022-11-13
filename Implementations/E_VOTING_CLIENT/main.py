@@ -65,11 +65,14 @@ def load_image(image_url: str, resize: tuple | None = None):
 def login_window():
     def masuk():
         res = requests.post(url+'verifikasi_token', data={"token": temp_token.get(), "nisn": temp_nisn.get()})
-        if (res.status_code == 200 and res.json()) or temp_nisn.get() == 'admin': 
+        if res.status_code == 200 and res.json(): 
             global nisn
             nisn = res.json()
+            err_msg.configure(text=' ')
             login_window_frame.grid_forget()
             pemilihan_window()
+        else:
+            err_msg.configure(text='Token atau NISN tidak valid atau sudah pernah dipakai !')
 
     def pemilihan_window():
         def pilih_pasangan():
@@ -176,6 +179,7 @@ def login_window():
     masukan_nisn = ttk.Entry(form_frame, textvariable=temp_nisn, font=('Arial', 14, 'normal'))
     masukan_token = ttk.Entry(form_frame, textvariable=temp_token, font=('Arial', 14, 'normal'))
     tombol_masuk = ttk.Button(form_frame, text='Masuk', padding=(12, 10, 12, 10), command=masuk, style='masuk.TButton')
+    err_msg = ttk.Label(form_frame, text=' ', width=55, foreground='red', font=('Arial', 12, 'bold'))
     masukan_nisn.bind('<Return>', lambda e: masukan_token.focus())
     masukan_token.bind('<Return>', lambda e: tombol_masuk.invoke())
     form_frame.grid(column=2, row=1, sticky=NSEW)
@@ -185,6 +189,7 @@ def login_window():
     ttk.Label(form_frame, text='Token').grid(column=1, row=4, sticky=EW, pady=6, padx=8)
     masukan_token.grid(column=1, row=5, sticky=EW, pady=6, padx=8)
     tombol_masuk.grid(column=1, row=6, sticky=EW, pady=6, padx=8)
+    err_msg.grid(column=1, row=7, sticky=EW, pady=6, padx=8)
 
 
     form_frame.columnconfigure(1, weight=1)

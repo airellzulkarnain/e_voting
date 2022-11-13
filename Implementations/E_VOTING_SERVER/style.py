@@ -23,3 +23,4 @@ def stylize(style: Style) -> None:
     style.configure(
         "paslon.Treeview", rowheight=80, font=("Arial", 14, "normal")
     )
+    style.map("paslon.Treeview", background=[("disabled", "whitesmoke")], foreground=[("disabled", "black")])
