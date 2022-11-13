@@ -1,4 +1,4 @@
-from sqlalchemy import select, update, and_, delete, or_
+from sqlalchemy import select, update, and_, delete, or_, func
 from sqlalchemy.orm import Session
 import pandas as pd
 import models
@@ -119,6 +119,10 @@ def ubah_passcode(db: Session, new_passcode: str):
 
 def ambil_pasangan(db: Session):
     return db.execute(select(models.Pasangan)).scalars().all()
+
+
+def ambil_persentase(db: Session, nomor_urut: str):
+    return (db.scalar(select(models.Pasangan.jumlah_suara).where(models.Pasangan.nomor_urut == nomor_urut))/db.scalar(select(func.sum(models.Pasangan.jumlah_suara))))*100.0
 
 
 def masukan_suara(db: Session, nomor_urut: int, nisn: str):

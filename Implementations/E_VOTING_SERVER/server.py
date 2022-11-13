@@ -42,3 +42,7 @@ def masukan_suara(
     nomor_urut: int = Form(...), nisn: str = Form(...), db: Session = Depends(get_db)
 ):
     return crud.masukan_suara(db, nomor_urut, nisn)
+
+@app.get("/ambil_persentase/{nomor_urut}")
+def ambil_persentase(nomor_urut: str, db: Session = Depends(get_db)):
+    return crud.ambil_persentase(db, nomor_urut)
