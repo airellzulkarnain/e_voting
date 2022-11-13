@@ -131,9 +131,27 @@ def main_window():
 
         def close():
             tombol_lihat_peserta.state(["!disabled"])
+            peserta_window.grab_release()
             peserta_window.destroy()
 
+        def ambil_peserta():
+            treeview_peserta.delete(*treeview_peserta.get_children())
+            for peserta in crud.lihat_peserta(db, keyword.get()):
+                treeview_peserta.insert(
+                    "",
+                    "end",
+                    values=(
+                        peserta.nama,
+                        peserta.nisn,
+                        peserta.nomor_urut_yang_dipilih
+                        if peserta.nomor_urut_yang_dipilih is not None
+                        else "Belum Memilih",
+                    ),
+                )
+            treeview_peserta.update_idletasks()
+        
         peserta_window = Toplevel(root)
+        peserta_window.grab_set()
         peserta_window.title("Peserta Pemilu")
         peserta_window.geometry("600x300")
         peserta_window.resizable(FALSE, FALSE)
@@ -151,40 +169,55 @@ def main_window():
             lihat_peserta_frame, orient=VERTICAL, command=treeview_peserta.yview
         )
         scrollbar_peserta.grid(column=2, row=1, sticky=(S, N))
-        masukan_cari_peserta = ttk.Entry(lihat_peserta_frame, textvariable=keyword)
+        frame_cari = ttk.Frame(lihat_peserta_frame)
+        masukan_cari_peserta = ttk.Entry(frame_cari, textvariable=keyword)
+        tombol_cari = ttk.Button(frame_cari, text='Cari', command=ambil_peserta)
+        frame_cari.grid(column=1, columnspan=2, row=2, sticky=NSEW)
+        masukan_cari_peserta.grid(column=1, row=1, sticky=NSEW)
+        masukan_cari_peserta.bind('<Return>', lambda e: ambil_peserta())
+        tombol_cari.grid(column=2, row=1, sticky=NSEW)
+
         treeview_peserta.configure(yscrollcommand=scrollbar_peserta.set)
-        for peserta in crud.lihat_peserta(db):
-            treeview_peserta.insert(
-                "",
-                "end",
-                values=(
-                    peserta.nama,
-                    peserta.nisn,
-                    peserta.nomor_urut_yang_dipilih
-                    if peserta.nomor_urut_yang_dipilih is not None
-                    else "Belum Memilih",
-                ),
-            )
+        ambil_peserta()
         peserta_window.rowconfigure(0, weight=1)
         peserta_window.columnconfigure(0, weight=1)
         lihat_peserta_frame.columnconfigure(1, weight=1)
-        lihat_peserta_frame.rowconfigure(1, weight=4)
+        lihat_peserta_frame.rowconfigure(1, weight=8)
+        lihat_peserta_frame.rowconfigure(2, weight=1)
+        frame_cari.columnconfigure(1, weight=10)
+        frame_cari.columnconfigure(2, weight=1)
+        frame_cari.rowconfigure(1, weight=1)
 
     @get_db
     def lihat_token(db: Session):
+        filter = BooleanVar()
         tombol_lihat_token.state(["disabled"])
 
         def close():
             tombol_lihat_token.state(["!disabled"])
+            token_window.grab_release()
             token_window.destroy()
+        
+        def tampilkan_token():
+            treeview_token.delete(*treeview_token.get_children())
+            for token in crud.lihat_token(db, filter.get()):
+                treeview_token.insert(
+                    "",
+                    "end",
+                    values=(token.keyword, "Sudah" if token.terpakai else "Belum"),
+                )
+            treeview_token.update_idletasks()
 
         token_window = Toplevel(root)
+        token_window.grab_set()
         token_window.title("Token")
         token_window.geometry("300x300")
         token_window.resizable(FALSE, FALSE)
         token_window.protocol("WM_DELETE_WINDOW", close)
         lihat_token_frame = ttk.Frame(token_window)
         lihat_token_frame.grid(column=0, row=0, sticky=(N, E, W, S))
+        checkbutton_belum = ttk.Checkbutton(lihat_token_frame, text='Tampilkan yang belum saja. ', onvalue=True, offvalue=False, variable=filter, command=tampilkan_token)
+        checkbutton_belum.grid(column=1, row=3, sticky=NSEW)
         treeview_token = ttk.Treeview(
             lihat_token_frame, columns=("token", "terpakai"), show="headings"
         )
@@ -202,17 +235,13 @@ def main_window():
         )
         button_cetak.grid(column=1, columnspan=2, row=2, sticky=(N, E, W, S))
         treeview_token.configure(yscrollcommand=scrollbar_token.set)
-        for token in crud.lihat_token(db):
-            treeview_token.insert(
-                "",
-                "end",
-                values=(token.keyword, "Sudah" if token.terpakai else "Belum"),
-            )
+        tampilkan_token()
         token_window.rowconfigure(0, weight=1)
         token_window.columnconfigure(0, weight=1)
         lihat_token_frame.columnconfigure(1, weight=1)
-        lihat_token_frame.rowconfigure(1, weight=4)
-        lihat_token_frame.rowconfigure(2, weight=1)
+        lihat_token_frame.rowconfigure(1, weight=6)
+        lihat_token_frame.rowconfigure(2, weight=2)
+        lihat_token_frame.rowconfigure(3, weight=1)
 
     @get_db
     def cetak_token(db: Session):

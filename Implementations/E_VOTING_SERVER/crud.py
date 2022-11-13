@@ -59,13 +59,21 @@ def cetak_token(db: Session):
     return 1
 
 
-def lihat_token(db: Session):
+def lihat_token(db: Session, belum_terpakai: bool = False):
+    if belum_terpakai:
+        return db.execute(select(models.Token).where(models.Token.terpakai == False)).scalars().all()
     return db.execute(select(models.Token)).scalars().all()
 
 
 def lihat_peserta(db: Session, keyword: str | None = None):
     if bool(keyword):
-        return db.execute(select(models.PesertaPemilu).where(or_(models.PesertaPemilu.nama.like(f'%{keyword}%'), models.PesertaPemilu.nisn.like(f'%{keyword}%'), models.PesertaPemilu.nomor_urut_yang_dipilih.like(f'%{keyword}%'))))
+        return db.execute(select(models.PesertaPemilu)
+        .where(or_(
+            models.PesertaPemilu.nama.like(f'%{keyword}%'), 
+            models.PesertaPemilu.nisn.like(f'%{keyword}%'), 
+            models.PesertaPemilu.nomor_urut_yang_dipilih.like(f'%{keyword}%')
+            ))
+        ).scalars().all()
     return db.execute(select(models.PesertaPemilu)).scalars().all()
 
 

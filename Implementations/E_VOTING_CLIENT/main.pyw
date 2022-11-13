@@ -137,6 +137,7 @@ def login_window():
             kumpulan_kartu[str(paslon['nomor_urut'])] = buat_kartu_paslon(paslon['nama_ketua'], paslon['nama_wakil'], paslon['gambar_ketua'], paslon['gambar_wakil'], paslon['nomor_urut'])
             canvas_pasangan_calon.create_window((10*(counter+1))+(kartu_width*counter), 10, anchor=NW, window=kumpulan_kartu[str(paslon['nomor_urut'])], width=kartu_width ,height=kartu_height)
             counter += 1
+        canvas_pasangan_calon.configure(scrollregion=canvas_pasangan_calon.bbox("all"))
 
 
 
@@ -157,6 +158,7 @@ def login_window():
             terimakasih_frame.grid(column=0, row=0, sticky=NSEW)
             terimakasih_frame.columnconfigure(0, weight=1)
             terimakasih_frame.rowconfigure(0, weight=1)
+            main_window.update_idletasks()
             sleep(2)
             terimakasih_frame.destroy()
             login_window_frame.grid(column=0, row=0, sticky=NSEW)
