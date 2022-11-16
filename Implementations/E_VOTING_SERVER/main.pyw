@@ -217,7 +217,7 @@ def main_window():
         lihat_token_frame = ttk.Frame(token_window)
         lihat_token_frame.grid(column=0, row=0, sticky=(N, E, W, S))
         checkbutton_belum = ttk.Checkbutton(lihat_token_frame, text='Tampilkan yang belum saja. ', onvalue=True, offvalue=False, variable=filter, command=tampilkan_token)
-        checkbutton_belum.grid(column=1, row=3, sticky=NSEW)
+        checkbutton_belum.grid(column=1, columnspan=2, row=3, sticky=NSEW)
         treeview_token = ttk.Treeview(
             lihat_token_frame, columns=("token", "terpakai"), show="headings"
         )
