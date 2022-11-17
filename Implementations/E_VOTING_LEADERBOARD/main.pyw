@@ -15,9 +15,9 @@ def update_progress():
     global jumlah_suara
     while True:
         for pasangan in requests.get(url+'ambil_pasangan').json(): 
-            jumlah_suara[pasangan['nomor_urut']][0].set(str(pasangan['jumlah_suara']))
+            jumlah_suara[pasangan['nomor_urut']][0].set(str(requests.get(url+f'ambil_persentase/{pasangan["nomor_urut"]}').json())[:5]+'%')
             jumlah_suara[pasangan['nomor_urut']][1].set(str(requests.get(url+f'ambil_persentase/{pasangan["nomor_urut"]}').json()))
-            sleep(0.03)
+        sleep(60)
 
 
 def call_main_window():
@@ -99,9 +99,9 @@ ip = StringVar()
 masukan_ip = ttk.Entry(root, textvariable=ip)
 start_button = ttk.Button(root, text='Mulai', command=mulai)
 
-ttk.Label(root, text='IP Address Server: ').grid(column=0, row=0, sticky=(N, E, W, S))
-masukan_ip.grid(column=0, row=1, sticky=(N, E, W, S))
-start_button.grid(column=0, row=2, sticky=(N, E, W, S))
+ttk.Label(root, text='IP Address Server: ').grid(column=0, row=0, sticky=NSEW)
+masukan_ip.grid(column=0, row=1, sticky=NSEW)
+start_button.grid(column=0, row=2, sticky=NSEW)
 
 masukan_ip.bind('<Return>', lambda e: start_button.invoke())
 masukan_ip.focus()

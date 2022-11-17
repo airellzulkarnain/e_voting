@@ -81,7 +81,7 @@ def buat_token(db: Session, jumlah: int):
     characters = string.ascii_letters + string.digits
     tokens = []
     for i in range(jumlah):
-        tokens.append(models.Token(keyword="".join(random.choices(characters, k=5))))
+        tokens.append(models.Token(keyword="".join(random.choices(characters, k=5)).lower()))
     db.add_all(tokens)
     db.commit()
     return 1
@@ -122,7 +122,10 @@ def ambil_pasangan(db: Session):
 
 
 def ambil_persentase(db: Session, nomor_urut: str):
-    return (db.scalar(select(models.Pasangan.jumlah_suara).where(models.Pasangan.nomor_urut == nomor_urut))/db.scalar(select(func.sum(models.Pasangan.jumlah_suara))))*100.0
+    try: 
+        return (db.scalar(select(models.Pasangan.jumlah_suara).where(models.Pasangan.nomor_urut == nomor_urut))/db.scalar(select(func.sum(models.Pasangan.jumlah_suara))))*100.0
+    except ZeroDivisionError:
+        return 0
 
 
 def masukan_suara(db: Session, nomor_urut: int, nisn: str):

@@ -35,6 +35,8 @@ root.resizable(FALSE, FALSE)
 stylize(ttk.Style)
 
 logo_pemilu = None
+logo_smk = None
+logo_osis = None
 url = ''
 
 nisn = ''
@@ -64,7 +66,7 @@ def load_image(image_url: str, resize: tuple | None = None):
 
 def login_window():
     def masuk():
-        res = requests.post(url+'verifikasi_token', data={"token": temp_token.get(), "nisn": temp_nisn.get()})
+        res = requests.post(url+'verifikasi_token', data={"token": temp_token.get().lower(), "nisn": temp_nisn.get()})
         if res.status_code == 200 and res.json(): 
             global nisn
             nisn = res.json()
@@ -96,14 +98,14 @@ def login_window():
                     child.configure(style="kartuselected.TLabel")
                 global nomor_urut
                 nomor_urut = _nomor_urut
-            gambar_pasangan[_nomor_urut] = [load_image(gambar_ketua, (250, 333)), load_image(gambar_wakil, (250, 333))]
+            gambar_pasangan[_nomor_urut] = [load_image(gambar_ketua, (220, 294)), load_image(gambar_wakil, (220, 294))]
             ttk.Label(kartu, text=_nomor_urut, anchor='center', style='kartu.TLabel').grid(column=1, columnspan=2, row=1, sticky=NSEW)
             ttk.Label(kartu, text='KETUA', anchor='center', style='kartu.TLabel').grid(column=1, row=2, sticky=NSEW)
             ttk.Label(kartu, text='WAKIL', anchor='center', style='kartu.TLabel').grid(column=2, row=2, sticky=NSEW)
             ttk.Label(kartu, image=gambar_pasangan[_nomor_urut][0]).grid(column=1, row=3, sticky=NSEW)
             ttk.Label(kartu, image=gambar_pasangan[_nomor_urut][1]).grid(column=2, row=3, sticky=NSEW)
-            ttk.Label(kartu, text=nama_ketua, anchor='center', wraplength=200, style='kartu.TLabel').grid(column=1, row=4, sticky=NSEW)
-            ttk.Label(kartu, text=nama_wakil, anchor='center', wraplength=200, style='kartu.TLabel').grid(column=2, row=4, sticky=NSEW)
+            ttk.Label(kartu, text=nama_ketua, anchor='center', wraplength=200, style='kartu_nama.TLabel').grid(column=1, row=4, sticky=NSEW)
+            ttk.Label(kartu, text=nama_wakil, anchor='center', wraplength=200, style='kartu_nama.TLabel').grid(column=2, row=4, sticky=NSEW)
             kartu.rowconfigure(1, weight=1)
             kartu.rowconfigure(2, weight=1)
             kartu.rowconfigure(3, weight=1)
@@ -115,29 +117,37 @@ def login_window():
             return kartu
         
         frame_pemilihan = ttk.Frame(main_window)
-        ttk.Label(frame_pemilihan, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(column=1, row=1, sticky=NSEW)
+        global logo_osis
+        global logo_smk
+        logo_osis = load_image('images/logo_osis.png', (100, 100))
+        logo_smk = load_image('images/logo_smkn_5.png', (75, 100))
+        ttk.Label(frame_pemilihan, image=logo_smk, anchor='center').grid(column=1, row=1, sticky=NSEW)
+        ttk.Label(frame_pemilihan, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(column=2, row=1, sticky=NSEW)
+        ttk.Label(frame_pemilihan, image=logo_osis, anchor='center').grid(column=3, row=1, sticky=NSEW)
         canvas_pasangan_calon = Canvas(frame_pemilihan, bg='lightgray')
-        canvas_pasangan_calon.grid(column=1, row=2, sticky=NSEW)
-        scrollbar_canvas = ttk.Scrollbar(frame_pemilihan, orient=HORIZONTAL, command=canvas_pasangan_calon.xview)
-        scrollbar_canvas.grid(column=1, row=3, sticky=EW)
-        canvas_pasangan_calon.configure(xscrollcommand=scrollbar_canvas.set)
+        canvas_pasangan_calon.grid(column=1, row=2, columnspan=3, sticky=NSEW)
+        # scrollbar_canvas = ttk.Scrollbar(frame_pemilihan, orient=HORIZONTAL, command=canvas_pasangan_calon.xview)
+        # scrollbar_canvas.grid(column=1, row=3, sticky=EW)
+        # canvas_pasangan_calon.configure(xscrollcommand=scrollbar_canvas.set)
         button_pilih = ttk.Button(frame_pemilihan, text='PILIH', command=pilih_pasangan, style='pilih.TButton')
-        button_pilih.grid(column=1, row=4, sticky=NSEW)
+        button_pilih.grid(column=1, columnspan=3, row=4, sticky=NSEW)
         frame_pemilihan.grid(column=0, row=0, sticky=NSEW)
         frame_pemilihan.columnconfigure(1, weight=1)
+        frame_pemilihan.columnconfigure(2, weight=10)
+        frame_pemilihan.columnconfigure(3, weight=1)
         frame_pemilihan.rowconfigure(1, weight=1)
         frame_pemilihan.rowconfigure(2, weight=6)
         frame_pemilihan.rowconfigure(4, weight=1)
         canvas_pasangan_calon.update()
         res = requests.get(url+'ambil_pasangan').json()
-        kartu_width = 500
+        kartu_width = 440
         kartu_height = canvas_pasangan_calon.winfo_height() - 20
         counter = 0
         for paslon in res:
             kumpulan_kartu[str(paslon['nomor_urut'])] = buat_kartu_paslon(paslon['nama_ketua'], paslon['nama_wakil'], paslon['gambar_ketua'], paslon['gambar_wakil'], paslon['nomor_urut'])
             canvas_pasangan_calon.create_window((10*(counter+1))+(kartu_width*counter), 10, anchor=NW, window=kumpulan_kartu[str(paslon['nomor_urut'])], width=kartu_width ,height=kartu_height)
             counter += 1
-        canvas_pasangan_calon.configure(scrollregion=canvas_pasangan_calon.bbox("all"))
+        # canvas_pasangan_calon.configure(scrollregion=canvas_pasangan_calon.bbox("all"))
 
 
 
@@ -159,7 +169,7 @@ def login_window():
             terimakasih_frame.columnconfigure(0, weight=1)
             terimakasih_frame.rowconfigure(0, weight=1)
             main_window.update_idletasks()
-            sleep(2)
+            sleep(5)
             terimakasih_frame.destroy()
             login_window_frame.grid(column=0, row=0, sticky=NSEW)
             
@@ -167,7 +177,7 @@ def login_window():
     main_window = Toplevel(root)
     main_window.wm_attributes('-fullscreen', 1)
     main_window.protocol('WM_DELETE_WINDOW', no_close)
-    main_window.bind('<Control-t><Key-a>', lambda e: root.destroy())
+    main_window.bind('<Alt-q>', lambda e: root.destroy())
     login_window_frame = ttk.Frame(main_window)
     login_window_frame.grid(column=0, row=0, sticky=NSEW)
 
@@ -178,19 +188,19 @@ def login_window():
     form_frame = ttk.Frame(login_window_frame)
     logo_pemilu = load_image('images/pemilu_osis_smkn_5_kota_tangerang.png')
     ttk.Label(login_window_frame, image=logo_pemilu, anchor='center').grid(column=1, row=1, sticky=NSEW)
-    masukan_nisn = ttk.Entry(form_frame, textvariable=temp_nisn, font=('Arial', 14, 'normal'))
-    masukan_token = ttk.Entry(form_frame, textvariable=temp_token, font=('Arial', 14, 'normal'))
+    masukan_nisn = ttk.Entry(form_frame, textvariable=temp_nisn, font=('Calibri', 20, 'normal'))
+    masukan_token = ttk.Entry(form_frame, textvariable=temp_token, font=('Calibri', 20, 'normal'))
     tombol_masuk = ttk.Button(form_frame, text='Masuk', padding=(12, 10, 12, 10), command=masuk, style='masuk.TButton')
-    err_msg = ttk.Label(form_frame, text=' ', width=55, foreground='red', font=('Arial', 12, 'bold'))
+    err_msg = ttk.Label(form_frame, text=' ', width=55, foreground='red', font=('Calibri', 12, 'bold'))
     masukan_nisn.bind('<Return>', lambda e: masukan_token.focus())
     masukan_token.bind('<Return>', lambda e: tombol_masuk.invoke())
     form_frame.grid(column=2, row=1, sticky=NSEW)
-    ttk.Label(form_frame, text='PEMILIHAN UMUM OSIS', style='header1.TLabel', anchor='center').grid(column=1, row=1, sticky=EW, pady=(root.winfo_screenheight()//3, 20))
+    ttk.Label(form_frame, text='PEMILIHAN UMUM OSIS', style='header1.TLabel', anchor='center').grid(column=1, row=1, sticky=EW, pady=(root.winfo_screenheight()//4, 20))
     ttk.Label(form_frame, text='NISN').grid(column=1, row=2, sticky=EW, pady=6, padx=8)
-    masukan_nisn.grid(column=1, row=3, sticky=EW, pady=6, padx=8)
+    masukan_nisn.grid(column=1, row=3, sticky=EW, pady=6, padx=(8, 32))
     ttk.Label(form_frame, text='Token').grid(column=1, row=4, sticky=EW, pady=6, padx=8)
-    masukan_token.grid(column=1, row=5, sticky=EW, pady=6, padx=8)
-    tombol_masuk.grid(column=1, row=6, sticky=EW, pady=6, padx=8)
+    masukan_token.grid(column=1, row=5, sticky=EW, pady=6, padx=(8, 32))
+    tombol_masuk.grid(column=1, row=6, sticky=EW, pady=6, padx=(8, 32))
     err_msg.grid(column=1, row=7, sticky=EW, pady=6, padx=8)
 
 
