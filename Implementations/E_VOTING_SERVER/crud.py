@@ -47,15 +47,22 @@ def masukan_peserta(db: Session, xlsx_name: str):
     db.commit()
 
 
-def cetak_token(db: Session):
+def cetak_token(db: Session, dir_: str):
     tokens = (
         db.execute(select(models.Token).where(models.Token.terpakai == False))
         .scalars()
         .all()
     )
-    df = pd.DataFrame({"tokens": [x.keyword for x in tokens]})
-    df.to_excel(r"temp\temp.xlsx", index=False)
-    win32api.ShellExecute(0, "print", r"temp\temp.xlsx", None, ".", 0)
+    peserta = lihat_peserta(db)
+    
+
+    df = pd.DataFrame({
+        "NAMA": [x.nama for x in peserta], 
+        "NISN": [x.nisn for x in peserta], 
+        "TOKEN": [x.keyword for x in tokens][:len(peserta)], 
+        })
+    df.to_excel(dir_+r'\data_peserta_pemilu.xlsx', index=False)
+    # win32api.ShellExecute(0, "print", r"temp\temp.xlsx", None, ".", 0)
     return 1
 
 

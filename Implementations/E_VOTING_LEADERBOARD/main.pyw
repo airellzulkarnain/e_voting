@@ -17,7 +17,23 @@ def update_progress():
         for pasangan in requests.get(url+'ambil_pasangan').json(): 
             jumlah_suara[pasangan['nomor_urut']][0].set(str(requests.get(url+f'ambil_persentase/{pasangan["nomor_urut"]}').json())[:5]+'%')
             jumlah_suara[pasangan['nomor_urut']][1].set(str(requests.get(url+f'ambil_persentase/{pasangan["nomor_urut"]}').json()))
-        sleep(60)
+        sleep(600)
+
+def update_timer():
+    global timer
+    while True:
+        time = timer.get().split(':')
+        if f'{time[0]}:{time[1]}' != '00:00':
+            if time[1] == '00':
+                time[0] = f'0{int(time[0])-1}'
+                time[1] = '59'
+            else: 
+                time[1] = int(time[1])-1
+                time[1] = f'0{time[1]}' if int(time[1]) < 10 else time[1]
+            timer.set(f'{time[0]}:{time[1]}')
+        else: 
+            timer.set('10:00')
+        sleep(1)
 
 
 def call_main_window():
@@ -62,11 +78,13 @@ def call_main_window():
 
     counter = 1
     global kumpulan_pasangan
+    global timer
     for pasangan in requests.get(url+'ambil_pasangan').json():
         kumpulan_pasangan[pasangan['nomor_urut']] = pasangan_calon(pasangan['nama_ketua'], pasangan['nama_wakil'], pasangan['gambar_ketua'], pasangan['gambar_wakil'], pasangan['nomor_urut'])
         kumpulan_pasangan[pasangan['nomor_urut']].grid(column=1, row=counter, sticky=EW)
         counter += 1
-
+    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 28, 'normal'), anchor=W).grid(column=1, row=counter, sticky=NSEW)
+    threading.Thread(target=update_timer, daemon=True).start()
     threading.Thread(target=update_progress, daemon=True).start()
 
 
@@ -95,6 +113,8 @@ url = ''
 jumlah_suara = dict()
 kumpulan_gambar = dict()
 kumpulan_pasangan = dict()
+timer = StringVar()
+timer.set('00:00')
 ip = StringVar()
 masukan_ip = ttk.Entry(root, textvariable=ip)
 start_button = ttk.Button(root, text='Mulai', command=mulai)

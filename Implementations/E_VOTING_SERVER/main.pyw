@@ -245,7 +245,7 @@ def main_window():
 
     @get_db
     def cetak_token(db: Session):
-        crud.cetak_token(db)
+        crud.cetak_token(db, filedialog.askdirectory(title='Pilih Folder...'))
 
     def refresh():
         treeview_pasangan.delete(*treeview_pasangan.get_children())
