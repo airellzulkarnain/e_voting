@@ -441,7 +441,6 @@ def main_window():
     )
     masukan_nomor_urut.grid(column=1, row=2, sticky=(W, E))
     masukan_nomor_urut.bind('<Return>', lambda e: masukan_nama_ketua.focus())
-    masukan_nomor_urut.state(["readonly"])
     ttk.Label(tambah_paslon_frame, text="Nama Ketua").grid(
         column=1, row=3, sticky=(W, E)
     )

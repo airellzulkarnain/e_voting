@@ -73,17 +73,20 @@ def call_main_window():
     main_frame.grid(column=0, row=0, sticky=NSEW)
     main_window.columnconfigure(0, weight=1)
     main_window.rowconfigure(0, weight=1)
-    main_frame.columnconfigure(1, weight=1)
-    ttk.Label(main_frame, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(row=0, column=1, sticky=NSEW, pady=(20, 50))
+    main_frame.columnconfigure(1, weight=2)
+    main_frame.columnconfigure(2, weight=6)
+    main_frame.columnconfigure(3, weight=2)
+    ttk.Label(main_frame, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(row=0, column=2, sticky=NSEW, pady=(50, 50))
 
     counter = 1
     global kumpulan_pasangan
     global timer
     for pasangan in requests.get(url+'ambil_pasangan').json():
         kumpulan_pasangan[pasangan['nomor_urut']] = pasangan_calon(pasangan['nama_ketua'], pasangan['nama_wakil'], pasangan['gambar_ketua'], pasangan['gambar_wakil'], pasangan['nomor_urut'])
-        kumpulan_pasangan[pasangan['nomor_urut']].grid(column=1, row=counter, sticky=EW)
+        kumpulan_pasangan[pasangan['nomor_urut']].grid(column=1, columnspan=3, row=counter, sticky=EW)
         counter += 1
-    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 28, 'normal'), anchor=W).grid(column=1, row=counter, sticky=NSEW)
+    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 28, 'normal'), anchor='center').grid(column=3, row=0, sticky=NSEW)
+    ttk.Label(main_frame, text='      ', font=('Calibri', 28, 'normal'), anchor='center').grid(column=1, row=0, sticky=NSEW)
     threading.Thread(target=update_timer, daemon=True).start()
     threading.Thread(target=update_progress, daemon=True).start()
 

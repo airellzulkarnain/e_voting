@@ -86,7 +86,7 @@ def login_window():
             if res.status_code == 200:
                 terimakasih_window()
         kumpulan_kartu = dict()
-        def buat_kartu_paslon(nama_ketua: str, nama_wakil: str, gambar_ketua:str, gambar_wakil: str, _nomor_urut: str)->ttk.Frame:
+        def buat_kartu_paslon(nama_ketua: str, nama_wakil: str, gambar_ketua:str, gambar_wakil: str, _nomor_urut: str, size: tuple)->ttk.Frame:
             kartu = ttk.Frame(canvas_pasangan_calon)
             global gambar_pasangan
             def pilih():
@@ -98,7 +98,7 @@ def login_window():
                     child.configure(style="kartuselected.TLabel")
                 global nomor_urut
                 nomor_urut = _nomor_urut
-            gambar_pasangan[_nomor_urut] = [load_image(gambar_ketua, (220, 294)), load_image(gambar_wakil, (220, 294))]
+            gambar_pasangan[_nomor_urut] = [load_image(gambar_ketua, size), load_image(gambar_wakil, size)]
             ttk.Label(kartu, text=_nomor_urut, anchor='center', style='kartu.TLabel').grid(column=1, columnspan=2, row=1, sticky=NSEW)
             ttk.Label(kartu, text='KETUA', anchor='center', style='kartu.TLabel').grid(column=1, row=2, sticky=NSEW)
             ttk.Label(kartu, text='WAKIL', anchor='center', style='kartu.TLabel').grid(column=2, row=2, sticky=NSEW)
@@ -140,11 +140,12 @@ def login_window():
         frame_pemilihan.rowconfigure(4, weight=1)
         canvas_pasangan_calon.update()
         res = requests.get(url+'ambil_pasangan').json()
-        kartu_width = 440
+        kartu_width = canvas_pasangan_calon.winfo_width()//3 - 13
+        pict_size = (int(kartu_width//2), int(kartu_width//2*(4/3)))
         kartu_height = canvas_pasangan_calon.winfo_height() - 20
         counter = 0
         for paslon in res:
-            kumpulan_kartu[str(paslon['nomor_urut'])] = buat_kartu_paslon(paslon['nama_ketua'], paslon['nama_wakil'], paslon['gambar_ketua'], paslon['gambar_wakil'], paslon['nomor_urut'])
+            kumpulan_kartu[str(paslon['nomor_urut'])] = buat_kartu_paslon(paslon['nama_ketua'], paslon['nama_wakil'], paslon['gambar_ketua'], paslon['gambar_wakil'], paslon['nomor_urut'], pict_size)
             canvas_pasangan_calon.create_window((10*(counter+1))+(kartu_width*counter), 10, anchor=NW, window=kumpulan_kartu[str(paslon['nomor_urut'])], width=kartu_width ,height=kartu_height)
             counter += 1
         # canvas_pasangan_calon.configure(scrollregion=canvas_pasangan_calon.bbox("all"))
