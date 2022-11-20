@@ -25,7 +25,7 @@ def no_close():
 def update_timer():
     global timer
     while True:
-        time = timer.get().split('\n')[1].split(':')
+        time = timer.get().split(': ')[1].split(':')
         if f'{time[0]}:{time[1]}' != '00:00':
             if time[1] == '00':
                 time[0] = f'0{int(time[0])-1}'
@@ -33,9 +33,9 @@ def update_timer():
             else: 
                 time[1] = int(time[1])-1
                 time[1] = f'0{time[1]}' if int(time[1]) < 10 else time[1]
-            timer.set(f'Countdown:\n{time[0]}:{time[1]}')
+            timer.set(f'Countdown: {time[0]}:{time[1]}')
         else: 
-            timer.set('Countdown:\n10:00')
+            timer.set('Countdown: 10:00')
         sleep(1)
 
 def load_gambar(url_gambar: str, resize: tuple | None = None):
@@ -75,10 +75,9 @@ def call_main_window():
     main_frame.grid(column=0, row=0, sticky=NSEW)
     main_window.columnconfigure(0, weight=1)
     main_window.rowconfigure(0, weight=1)
-    main_frame.columnconfigure(1, weight=2)
-    main_frame.columnconfigure(2, weight=7)
-    main_frame.columnconfigure(3, weight=2)
-    main_frame.columnconfigure(4, weight=1)
+    main_frame.columnconfigure(1, weight=1)
+    main_frame.columnconfigure(2, weight=8)
+    main_frame.columnconfigure(3, weight=1)
     ttk.Label(main_frame, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(row=0, column=2, sticky=NSEW, pady=(50, 50))
 
     counter = 1
@@ -86,7 +85,7 @@ def call_main_window():
     global timer
     for pasangan in requests.get(url+'ambil_pasangan').json():
         kumpulan_pasangan[pasangan['nomor_urut']] = pasangan_calon(pasangan['nama_ketua'], pasangan['nama_wakil'], pasangan['gambar_ketua'], pasangan['gambar_wakil'], pasangan['nomor_urut'])
-        kumpulan_pasangan[pasangan['nomor_urut']].grid(column=1, columnspan=5, row=counter, sticky=EW)
+        kumpulan_pasangan[pasangan['nomor_urut']].grid(column=1, columnspan=3, row=counter, sticky=EW)
         counter += 1
     global logo_osis
     global logo_smk
@@ -94,7 +93,7 @@ def call_main_window():
     logo_osis = load_gambar('images/logo_osis.png', (100, 100))
     ttk.Label(main_frame, image=logo_smk, anchor='center').grid(column=1, row=0, sticky=NSEW)
     ttk.Label(main_frame, image=logo_osis, anchor='center').grid(column=3, row=0, sticky=NSEW)
-    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 24, 'normal')).grid(column=4, row=0, sticky=NSEW)
+    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 24, 'normal')).grid(column=1, columnspan=3, row=counter, sticky=NSEW)
     threading.Thread(target=update_timer, daemon=True).start()
     threading.Thread(target=update_progress, daemon=True).start()
 
@@ -127,7 +126,7 @@ kumpulan_pasangan = dict()
 logo_osis = None
 logo_smk = None
 timer = StringVar()
-timer.set('Countdown:\n00:00')
+timer.set('Countdown: 00:00')
 ip = StringVar()
 masukan_ip = ttk.Entry(root, textvariable=ip)
 start_button = ttk.Button(root, text='Mulai', command=mulai)
