@@ -33,9 +33,9 @@ def update_timer():
             else: 
                 time[1] = int(time[1])-1
                 time[1] = f'0{time[1]}' if int(time[1]) < 10 else time[1]
-            timer.set(f'Countdown: {time[0]}:{time[1]}')
+            timer.set(f'Hitungan Mundur: {time[0]}:{time[1]}')
         else: 
-            timer.set('Countdown: 10:00')
+            timer.set('Hitungan Mundur: 10:00')
         sleep(1)
 
 def load_gambar(url_gambar: str, resize: tuple | None = None):
@@ -78,7 +78,7 @@ def call_main_window():
     main_frame.columnconfigure(1, weight=1)
     main_frame.columnconfigure(2, weight=8)
     main_frame.columnconfigure(3, weight=1)
-    ttk.Label(main_frame, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(row=0, column=2, sticky=NSEW, pady=(50, 50))
+    ttk.Label(main_frame, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(row=0, column=2, sticky=NSEW, pady=40)
 
     counter = 1
     global kumpulan_pasangan
@@ -93,7 +93,7 @@ def call_main_window():
     logo_osis = load_gambar('images/logo_osis.png', (100, 100))
     ttk.Label(main_frame, image=logo_smk, anchor='center').grid(column=1, row=0, sticky=NSEW)
     ttk.Label(main_frame, image=logo_osis, anchor='center').grid(column=3, row=0, sticky=NSEW)
-    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 24, 'normal')).grid(column=1, columnspan=3, row=counter, sticky=NSEW)
+    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 24, 'normal')).grid(column=1, columnspan=3, row=counter, sticky=NSEW, pady=(10, 0), padx=10)
     threading.Thread(target=update_timer, daemon=True).start()
     threading.Thread(target=update_progress, daemon=True).start()
 
@@ -126,7 +126,7 @@ kumpulan_pasangan = dict()
 logo_osis = None
 logo_smk = None
 timer = StringVar()
-timer.set('Countdown: 00:00')
+timer.set('Hitungan Mundur: 00:00')
 ip = StringVar()
 masukan_ip = ttk.Entry(root, textvariable=ip)
 start_button = ttk.Button(root, text='Mulai', command=mulai)
