@@ -19,10 +19,13 @@ def update_progress():
             jumlah_suara[pasangan['nomor_urut']][1].set(str(requests.get(url+f'ambil_persentase/{pasangan["nomor_urut"]}').json()))
         sleep(600)
 
+def no_close():
+    pass
+
 def update_timer():
     global timer
     while True:
-        time = timer.get().split(':')
+        time = timer.get().split('\n')[1].split(':')
         if f'{time[0]}:{time[1]}' != '00:00':
             if time[1] == '00':
                 time[0] = f'0{int(time[0])-1}'
@@ -30,11 +33,15 @@ def update_timer():
             else: 
                 time[1] = int(time[1])-1
                 time[1] = f'0{time[1]}' if int(time[1]) < 10 else time[1]
-            timer.set(f'{time[0]}:{time[1]}')
+            timer.set(f'Countdown:\n{time[0]}:{time[1]}')
         else: 
-            timer.set('10:00')
+            timer.set('Countdown:\n10:00')
         sleep(1)
 
+def load_gambar(url_gambar: str, resize: tuple | None = None):
+    if resize: 
+        return ImageTk.PhotoImage(Image.open(BytesIO(requests.get(url+url_gambar).content)).resize(resize))
+    return ImageTk.PhotoImage(Image.open(BytesIO(requests.get(url+url_gambar).content)))
 
 def call_main_window():
     def pasangan_calon(nama_ketua: str, nama_wakil: str, gambar_ketua: str, gambar_wakil: str, nomor_urut: str)->ttk.Frame:
@@ -58,15 +65,10 @@ def call_main_window():
         pasangan.rowconfigure(2, weight=1)
         return pasangan
 
-    
-    def load_gambar(url_gambar: str, resize: tuple | None = None):
-        if resize: 
-            return ImageTk.PhotoImage(Image.open(BytesIO(requests.get(url+url_gambar).content)).resize(resize))
-        return ImageTk.PhotoImage(Image.open(BytesIO(requests.get(url+url_gambar).content)))
-
     main_window = Toplevel(root)
     main_window.attributes('-fullscreen', 1)
-    main_window.protocol('WM_DELETE_WINDOW', root.destroy)
+    main_window.protocol('WM_DELETE_WINDOW', no_close)
+    main_window.bind('<Alt-q>', lambda e: root.destroy())
     main_window.columnconfigure(0, weight=1)
     main_window.rowconfigure(0, weight=1)
     main_frame = ttk.Frame(main_window)
@@ -74,8 +76,9 @@ def call_main_window():
     main_window.columnconfigure(0, weight=1)
     main_window.rowconfigure(0, weight=1)
     main_frame.columnconfigure(1, weight=2)
-    main_frame.columnconfigure(2, weight=6)
+    main_frame.columnconfigure(2, weight=7)
     main_frame.columnconfigure(3, weight=2)
+    main_frame.columnconfigure(4, weight=1)
     ttk.Label(main_frame, text='PASANGAN CALON KETUA DAN WAKIL KETUA OSIS', anchor='center', style='header1.TLabel').grid(row=0, column=2, sticky=NSEW, pady=(50, 50))
 
     counter = 1
@@ -83,10 +86,15 @@ def call_main_window():
     global timer
     for pasangan in requests.get(url+'ambil_pasangan').json():
         kumpulan_pasangan[pasangan['nomor_urut']] = pasangan_calon(pasangan['nama_ketua'], pasangan['nama_wakil'], pasangan['gambar_ketua'], pasangan['gambar_wakil'], pasangan['nomor_urut'])
-        kumpulan_pasangan[pasangan['nomor_urut']].grid(column=1, columnspan=3, row=counter, sticky=EW)
+        kumpulan_pasangan[pasangan['nomor_urut']].grid(column=1, columnspan=5, row=counter, sticky=EW)
         counter += 1
-    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 28, 'normal'), anchor='center').grid(column=3, row=0, sticky=NSEW)
-    ttk.Label(main_frame, text='      ', font=('Calibri', 28, 'normal'), anchor='center').grid(column=1, row=0, sticky=NSEW)
+    global logo_osis
+    global logo_smk
+    logo_smk = load_gambar('images/logo_smkn_5.png', (75, 100))
+    logo_osis = load_gambar('images/logo_osis.png', (100, 100))
+    ttk.Label(main_frame, image=logo_smk, anchor='center').grid(column=1, row=0, sticky=NSEW)
+    ttk.Label(main_frame, image=logo_osis, anchor='center').grid(column=3, row=0, sticky=NSEW)
+    ttk.Label(main_frame, textvariable=timer, font=('Calibri', 24, 'normal')).grid(column=4, row=0, sticky=NSEW)
     threading.Thread(target=update_timer, daemon=True).start()
     threading.Thread(target=update_progress, daemon=True).start()
 
@@ -116,8 +124,10 @@ url = ''
 jumlah_suara = dict()
 kumpulan_gambar = dict()
 kumpulan_pasangan = dict()
+logo_osis = None
+logo_smk = None
 timer = StringVar()
-timer.set('00:00')
+timer.set('Countdown:\n00:00')
 ip = StringVar()
 masukan_ip = ttk.Entry(root, textvariable=ip)
 start_button = ttk.Button(root, text='Mulai', command=mulai)
