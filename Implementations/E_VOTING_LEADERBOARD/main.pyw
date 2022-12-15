@@ -17,7 +17,7 @@ def update_progress():
         for pasangan in requests.get(url+'ambil_pasangan').json(): 
             jumlah_suara[pasangan['nomor_urut']][0].set(str(requests.get(url+f'ambil_persentase/{pasangan["nomor_urut"]}').json())[:5]+'%')
             jumlah_suara[pasangan['nomor_urut']][1].set(str(requests.get(url+f'ambil_persentase/{pasangan["nomor_urut"]}').json()))
-        sleep(600)
+        sleep(5)
 
 def no_close():
     pass
@@ -35,7 +35,7 @@ def update_timer():
                 time[1] = f'0{time[1]}' if int(time[1]) < 10 else time[1]
             timer.set(f'Hitungan Mundur: {time[0]}:{time[1]}')
         else: 
-            timer.set('Hitungan Mundur: 10:00')
+            timer.set('Hitungan Mundur: 00:05')
         sleep(1)
 
 def load_gambar(url_gambar: str, resize: tuple | None = None):
